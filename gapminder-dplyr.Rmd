@@ -4,6 +4,7 @@ author: "Michael Paccassi"
 date: "April 16, 2016"
 output: html_document
 ---
+# First Header
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -16,12 +17,75 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
 
-## Including Plots
+## Load Gapminder
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, echo=FALSE}
+install.packages('gapminder')
+library(gapminder)
+str(gapminder) #structure
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Exploration with gapminder
+```{r}
+gapminder2 <- filter(gapminder, lifeExp < 29)
+
+gapminder3 <- filter(gapminder, country == "Rwanda")
+
+#compare without dplyr
+
+gapminder[gapminder$lifeExp <29, 0]
+
+subset(gapminder, country == "Rwanda")
+
+#The Pipe Operator! %>% #controlshift M
+#From magrittr package
+
+gapminder %>% head
+head(gapminder)
+
+gapminder %>%  head(3)
+head(gapminder, 3)
+
+## subset with comand select()
+NewData <- select(gapminder, year, lifeExp)
+gapminder %>% select(year, lifeExp)
+
+gapminder %>% #this is the data set hat i will 
+  select(year, lifeExp) %>% #select from
+  head(4) #and take the head 
+
+#caluclating the mean gdp of cambodia
+######################################
+gapminder %>% 
+  filter(country == "Cambodia") %>%
+  select(country, year, pop, gdpPercap)
+  #can also do select(-continent, -lifeExp)
+
+#compare to base r
+gapminder[gapminder$country == "Cambodia", c("country", "year", "pop", "gdpPercap")]
+
+```
+
+## Continue With Mutate
+```{r}
+#add new column
+
+gapminder %>% 
+  mutate(gdp = pop * gdpPercap)
+
+NewGap <- gapminder %>% 
+  # filter(country == "Cambodia") %>%
+  select(country, year, pop, gdpPercap) %>% 
+  mutate(gdp = pop * gdpPercap) %>% 
+  group_by(country) %>% 
+  summarise(mean_gdp = mean(gdp)) %>% 
+  ungroup()
+
+ggplot(NewGap, aes(x = country, y = mean_gdp, size = mean_gdp)) +
+  geom_point()
+
+#library(dplyr)
+#library(tidyr)
+  
+```
+
